@@ -27,6 +27,7 @@ For local builds this is:
 mkdir build
 cd build
 cmake -D32BLIT_DIR=/path/to/32blit-sdk/ ..
+make game
 ```
 
 Platform/Editor specific insctuctions [can be found in the main 32blit repo](https://github.com/32blit/32blit-sdk#you-will-need)
