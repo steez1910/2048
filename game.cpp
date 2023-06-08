@@ -1,48 +1,45 @@
 #include "game.hpp"
 #include "assets.hpp"
-
+// #include "32blit.hpp"
 using namespace blit;
 
 #define SCREEN_HEIGHT 240
 #define SCREEN_WEIGHT 320
 #define SQURE_SIZE 58
+
+
+int MAP[4][4] = {
+    {2, 4, 2, 8,},
+	{32, 2, 16, 2},
+	{2, 1024, 2, 0},
+	{512, 2, 32, 2048},	
+};
+
+// numbers
+Rect n0 = Rect(84,0,7,7);
+Rect n2 = Rect(0,0,7,7);
+Rect n4 = Rect(7,0,7,7);
+Rect n8 = Rect(14,0,7,7);
+Rect n16 = Rect(21,0,7,7);
+Rect n32 = Rect(28,0,7,7);
+Rect n64 = Rect(35,0,7,7);
+Rect n128 = Rect(42,0,7,7);
+Rect n256 = Rect(49,0,7,7);
+Rect n512 = Rect(56,0,7,7);
+Rect n1024 = Rect(63,0,7,7);
+Rect n2048 = Rect(70,0,7,7);
+Rect n4096 = Rect(77,0,7,7);
 ///////////////////////////////////////////////////////////////////////////
 
-// init()
-//
-// setup your game here
-//
+
 void init() {
     set_screen_mode(ScreenMode::hires);
-    screen.sprites = Surface::load(two);
+    screen.sprites = Surface::load(sheet);
 }
 
 void renderBackground(){
     // clear the screen -- screen is a reference to the frame buffer and can be used to draw all things with the 32blit
     screen.clear();
-
-    // draw some text at the top of the screen
-    screen.alpha = 255;
-    screen.mask = nullptr;
-    screen.pen = Pen(196, 164, 132);
-    screen.rectangle(Rect(0, 0, SCREEN_WEIGHT, SCREEN_HEIGHT));
-    screen.pen = Pen(0, 0, 0);
-    
-    screen.rectangle(Rect(40, 0, 1, SCREEN_HEIGHT));
-    screen.rectangle(Rect(279, 0, 1, SCREEN_HEIGHT));
-
-    screen.rectangle(Rect(40, 0, SCREEN_HEIGHT, 1));
-    screen.rectangle(Rect(40, 239, SCREEN_HEIGHT, 1));
-
-    int startx = 41;
-    int starty = 1;
-    for (int i = 0; i < 3; i++) {
-        screen.rectangle(Rect(startx + SQURE_SIZE, 0, 2, SCREEN_HEIGHT));
-        screen.rectangle(Rect(40, starty + SQURE_SIZE, SCREEN_HEIGHT, 2));
-        startx = startx + SQURE_SIZE + 2;
-        starty = starty + SQURE_SIZE + 2;
-    }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -55,15 +52,29 @@ void renderBackground(){
 void render(uint32_t time) {
 
     renderBackground();
-    screen.sprite(5, Point(50, 20));
 
-    //screen.text("2048", minimal_font, Point(150, 5));
+    for (int j =0; j <4; j++) 
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            if (MAP[j][k] == 0){ screen.sprite(n0, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 2){ screen.sprite(n2, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 4){screen.sprite(n4, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 8){screen.sprite(n8, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 16){screen.sprite(n16, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 32){screen.sprite(n32, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 64){screen.sprite(n64, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 128){screen.sprite(n128, Point(42 + k *SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 256){screen.sprite(n256, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 512){screen.sprite(n512, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 1024){screen.sprite(n1024, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 2048){screen.sprite(n2048, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
+            if (MAP[j][k] == 4096){screen.sprite(n4096, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));} 
+        }
+        
+    }
+
 }
-
-    
-    
-    // screen.pen = Pen(255, 255, 255);
-    // screen.rectangle(Rect(240, 0, 80, 240));
 
     
 ///////////////////////////////////////////////////////////////////////////
