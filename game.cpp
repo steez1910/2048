@@ -1,5 +1,8 @@
 #include "game.hpp"
 #include "assets.hpp"
+#include <time.h>
+#include <iostream>
+#include <cstdlib>
 // #include "32blit.hpp"
 using namespace blit;
 
@@ -8,13 +11,12 @@ using namespace blit;
 #define SQURE_SIZE 58
 
 
-int MAP[4][4] = {
-    {2, 4, 2, 8,},
-	{32, 2, 16, 2},
-	{2, 1024, 2, 0},
-	{512, 2, 32, 2048},	
+int MAP[4][4] = {0
+    // {0, 0, 512, 1024,},
+	// {64, 512, 0, 2},
+	// {0, 0, 32, 2},
+	// {64, 0, 0, 2},	
 };
-
 // numbers
 Rect n0 = Rect(84,0,7,7);
 Rect n2 = Rect(0,0,7,7);
@@ -29,12 +31,106 @@ Rect n512 = Rect(56,0,7,7);
 Rect n1024 = Rect(63,0,7,7);
 Rect n2048 = Rect(70,0,7,7);
 Rect n4096 = Rect(77,0,7,7);
+
+bool Moved = false;
+
 ///////////////////////////////////////////////////////////////////////////
+void generateRandomNumber()
+{
+    uint x,y;
+       do
+    {
+        x = rand() %4;
+        y = rand() %4;
+    } while (MAP[y][x] !=0);
+
+    MAP[y][x]=2;
+}
+// void score()
+// {
+//     int score;
+//     for ( int x = 0; x < 4; x++)
+//     {
+//         for (int y = 0; y < 4; y++)
+//         {
+//             score += MAP[y][x];
+//         }
+        
+//     }
+// }
+
+
+
+void move(int x, int y, int X, int Y )
+{
+    if (MAP[y][x] == 0)
+    {
+        MAP[y][x] = MAP[y+Y][x+X];
+        MAP[y+Y][x+X] = 0;
+        Moved = true;
+    }
+    if (MAP[y][x] != 0 && MAP[y][x] == MAP[y+Y][x+X])
+    {
+        MAP[y][x] =  MAP[y][x] + MAP[y+Y][x+X];
+        MAP[y+Y][x+X] = 0;
+        Moved = true;
+    }
+    
+}
+
+void moveUP()
+{
+     uint x,y;
+    for ( x = 0; x < 4; x++)
+    {
+        for ( y = 0; y < 3; y++)
+        {
+            move(x, y, 0 , 1);
+        }
+        
+    }
+}   
+void moveDown(){   
+    uint x,y;
+    for ( x = 0; x < 4; x++)
+    {
+        for ( y = 3; y > 0; y--)
+        {
+            move(x, y, 0 , -1);
+        }
+        
+    }
+}
+void moveLeft() {
+    uint x,y;
+    for ( y = 0; y < 4; y++)
+    {
+        for ( x = 0; x < 3; x++)
+        {
+            move(x, y, 1 , 0);
+        }
+    }
+}
+void moveRight() {
+    uint x,y;
+    for ( y = 0; y < 4; y++)
+    {
+        for ( x = 3; x > 0; x--)
+        {
+            move(x, y, -1 , 0);
+        }
+        
+    }
+
+}
+
 
 
 void init() {
+    srand(time(0));
     set_screen_mode(ScreenMode::hires);
     screen.sprites = Surface::load(sheet);
+    // generateRandomNumber();
 }
 
 void renderBackground(){
@@ -52,28 +148,32 @@ void renderBackground(){
 void render(uint32_t time) {
 
     renderBackground();
+    screen.pen = Pen(0, 0, 0);
+  
 
-    for (int j =0; j <4; j++) 
+     
+
+    for (int y = 0; y < 4; y++) 
     {
-        for (int k = 0; k < 4; k++)
+        for (int x = 0; x < 4; x++)
         {
-            if (MAP[j][k] == 0){ screen.sprite(n0, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 2){ screen.sprite(n2, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 4){screen.sprite(n4, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 8){screen.sprite(n8, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 16){screen.sprite(n16, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 32){screen.sprite(n32, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 64){screen.sprite(n64, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 128){screen.sprite(n128, Point(42 + k *SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 256){screen.sprite(n256, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 512){screen.sprite(n512, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 1024){screen.sprite(n1024, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 2048){screen.sprite(n2048, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 4096){screen.sprite(n4096, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));} 
+            if (MAP[y][x] == 0){ screen.sprite(n0, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 2){ screen.sprite(n2, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 4){screen.sprite(n4, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 8){screen.sprite(n8, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 16){screen.sprite(n16, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 32){screen.sprite(n32, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 64){screen.sprite(n64, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 128){screen.sprite(n128, Point(42 + x *SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 256){screen.sprite(n256, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 512){screen.sprite(n512, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 1024){screen.sprite(n1024, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 2048){screen.sprite(n2048, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 4096){screen.sprite(n4096, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));} 
         }
         
     }
-
+    
 }
 
     
@@ -85,4 +185,27 @@ void render(uint32_t time) {
 // amount if milliseconds elapsed since the start of your game
 //
 void update(uint32_t time) {
+    if (buttons.released & Button::DPAD_UP) 
+    {
+        moveUP();
+    }
+    if (pressed(Button::DPAD_DOWN) )
+    {
+        moveDown();
+    }
+    if (pressed(Button::DPAD_LEFT) )
+    {
+        moveLeft();
+    }
+    if (pressed(Button::DPAD_RIGHT) )
+    {
+        moveRight();
+    }
+    if  (Moved) 
+    {
+        Moved = false;
+        generateRandomNumber();
+
+    }
+    
 }
