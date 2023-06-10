@@ -11,11 +11,11 @@ using namespace blit;
 #define SQURE_SIZE 58
 
 
-int MAP[4][4] = {0
-    // {0, 0, 512, 1024,},
-	// {64, 512, 0, 2},
-	// {0, 0, 32, 2},
-	// {64, 0, 0, 2},	
+int MAP[4][4] = {
+    {4, 4, 16, 0,},
+	{2, 0, 0, 4},
+	{2, 0, 32, 0},
+	{0, 0, 128, 0},	
 };
 // numbers
 Rect n0 = Rect(84,0,7,7);
@@ -62,75 +62,101 @@ void generateRandomNumber()
 
 
 void move(int x, int y, int X, int Y )
-{
-    if (MAP[y][x] == 0)
-    {
+{   
+    if (MAP[y][x] == 0 && MAP[y+Y][x+X] !=0)
+    {   
         MAP[y][x] = MAP[y+Y][x+X];
         MAP[y+Y][x+X] = 0;
         Moved = true;
     }
+        
     if (MAP[y][x] != 0 && MAP[y][x] == MAP[y+Y][x+X])
     {
         MAP[y][x] =  MAP[y][x] + MAP[y+Y][x+X];
         MAP[y+Y][x+X] = 0;
         Moved = true;
     }
+    if (MAP[y][x] == MAP[y+Y][x+X] + MAP[y+Y+1][x+X] || MAP[y][x] == MAP[y+Y][x+X] + MAP[y+Y][x+X+1] )
+    {
+       MAP[y][x] = MAP[y][x];
+       MAP[y+Y][x+X] = MAP[y+Y][x+X] + MAP[y+Y+1][x+X];
+       MAP[y+Y+1][x+X] = MAP[y+Y+2][x+X];
+
+    }
     
 }
 
 void moveUP()
 {
-     uint x,y;
-    for ( x = 0; x < 4; x++)
+    uint x,y;
+
+    for (int i = 0; i < 3; i++)
     {
-        for ( y = 0; y < 3; y++)
+        for ( x = 0; x < 4; x++)
         {
-            move(x, y, 0 , 1);
+            for ( y = 0; y < 3; y++)
+            {
+                move(x, y, 0 , 1);
+            }
         }
-        
     }
 }   
-void moveDown(){   
+
+void moveDown()
+{   
     uint x,y;
-    for ( x = 0; x < 4; x++)
+
+    for (int i = 0; i < 3; i++)
     {
-        for ( y = 3; y > 0; y--)
+        for ( x = 0; x < 4; x++)
         {
-            move(x, y, 0 , -1);
-        }
+            for ( y = 3; y > 0; y--)
+            {
+                move(x, y, 0 , -1);
+            }
         
-    }
-}
-void moveLeft() {
-    uint x,y;
-    for ( y = 0; y < 4; y++)
-    {
-        for ( x = 0; x < 3; x++)
-        {
-            move(x, y, 1 , 0);
         }
     }
 }
-void moveRight() {
-    uint x,y;
-    for ( y = 0; y < 4; y++)
-    {
-        for ( x = 3; x > 0; x--)
-        {
-            move(x, y, -1 , 0);
-        }
-        
-    }
 
+void moveLeft() 
+{
+    uint x,y;
+
+    for (int i = 0; i < 3; i++)
+    {
+        for ( y = 0; y < 4; y++)
+        {
+            for ( x = 0; x < 3; x++)
+            {
+                move(x, y, 1 , 0);
+            }
+        }
+    } 
 }
 
+void moveRight() 
+{
+    uint x,y;
 
+    for (int i = 0; i < 3; i++)
+    {
+        for ( y = 0; y < 4; y++)
+        {
+            for ( x = 3; x > 0; x--)
+            {
+                move(x, y, -1 , 0);
+            }
+        }
+    }
+}
 
 void init() {
     srand(time(0));
     set_screen_mode(ScreenMode::hires);
     screen.sprites = Surface::load(sheet);
-    // generateRandomNumber();
+    generateRandomNumber();
+    generateRandomNumber();
 }
 
 void renderBackground(){
@@ -188,16 +214,17 @@ void update(uint32_t time) {
     if (buttons.released & Button::DPAD_UP) 
     {
         moveUP();
+        
     }
-    if (pressed(Button::DPAD_DOWN) )
+    if (buttons.released & Button::DPAD_DOWN)
     {
         moveDown();
     }
-    if (pressed(Button::DPAD_LEFT) )
+    if (buttons.released & Button::DPAD_LEFT)
     {
         moveLeft();
     }
-    if (pressed(Button::DPAD_RIGHT) )
+    if (buttons.released & Button::DPAD_RIGHT )
     {
         moveRight();
     }
@@ -207,5 +234,4 @@ void update(uint32_t time) {
         generateRandomNumber();
 
     }
-    
 }
