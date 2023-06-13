@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include "assets.hpp"
+
 // #include "32blit.hpp"
 using namespace blit;
 
@@ -9,12 +10,11 @@ using namespace blit;
 
 
 int MAP[4][4] = {
-    {2, 4, 2, 8,},
-	{32, 2, 16, 2},
-	{2, 1024, 2, 0},
-	{512, 2, 32, 2048},	
+    {2, 2, 8, 16,},
+	{16, 2, 4, 8},
+	{2, 4, 8, 16},
+	{16, 4, 4, 8},	
 };
-
 // numbers
 Rect n0 = Rect(84,0,7,7);
 Rect n2 = Rect(0,0,7,7);
@@ -29,12 +29,227 @@ Rect n512 = Rect(56,0,7,7);
 Rect n1024 = Rect(63,0,7,7);
 Rect n2048 = Rect(70,0,7,7);
 Rect n4096 = Rect(77,0,7,7);
+
+bool Moved = false;
+
 ///////////////////////////////////////////////////////////////////////////
+void generateRandomNumber()
+{
+    //1 - limit the loop
+    //2 - generate 2 and 4
+    //3 - 4 is rare
+    // int val = blit::random() % 2 == 0 ? 2 : 4;
+    int val;
+    uint x,y;
+
+    if  ((blit::random() % 4) < 4)
+    {
+        val=2;
+    }
+    else 
+    {
+        val=4;
+    }
+
+    for (int i = 0; i < 21; i++)
+    {
+        x = blit::random() % 4;
+        y = blit::random() % 4;
+        if  (MAP[y][x] == 0) {
+                MAP[y][x] = val;
+                return;
+        }
+    }
+
+    for (x = 0; x < 4; x++)
+    {
+        for (y = 0; y < 4; y++)
+        {
+            if  (MAP[y][x] == 0) {
+                MAP[y][x] = val;
+                return;
+            }
+        }
+    }       
+
+}    
+
+void swap( int *a, int *b )
+{
+   int tmp = *a;
+   *a = *b;
+   *b = tmp;;
+}
+
+void pushZerosEndRaw(int y, int direction){
+    int FirstNonZero;
+
+    if (direction == 1)
+    {
+        FirstNonZero = 0;
+
+        for (int x = 0; x < 4; x++)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                FirstNonZero ++;
+                Moved = true;
+            } 
+        }
+    }
+    else 
+    {
+        FirstNonZero = 3;
+
+        for (int x = 3; x >= 0; x--)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                FirstNonZero --;
+                Moved = true;
+            } 
+        }
+    }
+    
+    
+}
+void pushZerosColumn(int x, int direction)
+{
+    if (direction == 1)
+    {
+        int FirstNonZero = 0;
+
+        for (int y = 0; y < 4; y++)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                FirstNonZero ++;
+                Moved = true;
+            } 
+        }
+    }
+    else 
+    {
+         int FirstNonZero = 3;
+
+        for (int y = 3; y >= 0; y--)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                FirstNonZero --;
+                Moved = true;
+            } 
+        }
+
+    }
+}
+
+void pushZerosDown()
+{
+    for (int x = 0; x < 4; x++)
+    {
+        pushZerosColumn(x,0);
+    }
+}
+
+void pushZerosTop()
+{
+    for (int x = 0; x < 4; x++)
+    {
+        pushZerosColumn(x,1);
+    }
+}
+
+void pushZerosLeft()
+{
+    for (int y = 0; y < 4; y++)
+    {
+        pushZerosEndRaw(y,1);
+    }
+}
+
+void pushZeroRight()
+{
+    for ( int y = 0; y < 4; y++)
+    {
+        pushZerosEndRaw(y,0);
+    }
+}
+
+void plus(int x, int y, int X, int Y )
+{
+    if (MAP[y][x] != 0 && MAP[y][x] == MAP[y+Y][x+X])
+    {
+        MAP[y][x] =  MAP[y][x] + MAP[y+Y][x+X];
+        MAP[y+Y][x+X] = 0;   
+        
+    } 
+}
+
+void plusUP()
+{
+    uint x,y;
+
+    for ( x = 0; x < 4; x++)
+    {
+        for ( y = 0; y < 3; y++)
+        {
+            plus(x, y, 0 , 1);
+        }
+    }
+    
+}   
+
+void plusDown()
+{
+    uint x,y;
+
+    for ( x = 0; x < 4; x++)
+    {
+        for ( y = 0; y < 4; y++)
+        {
+            plus(x, y, 0 , -1);
+        }
+    }
+    
+}
+void plusLeft()
+{
+    uint x,y;
+
+    for ( y = 0; y < 4; y++)
+        {
+            for ( x = 0; x < 3; x++)
+            {
+                plus(x, y, 1 , 0);
+            }
+        }
+} 
+
+void plusRight()
+{
+    uint x,y;
+
+    for ( y = 0; y < 4; y++)
+        {
+            for ( x = 3; x > 0; x--)
+            {
+                plus(x, y, -1 , 0);
+            }
+        }
+}
+
 
 
 void init() {
     set_screen_mode(ScreenMode::hires);
     screen.sprites = Surface::load(sheet);
+    generateRandomNumber();
+    //generateRandomNumber();
 }
 
 void renderBackground(){
@@ -52,28 +267,32 @@ void renderBackground(){
 void render(uint32_t time) {
 
     renderBackground();
+    screen.pen = Pen(0, 0, 0);
+  
 
-    for (int j =0; j <4; j++) 
+     
+
+    for (int y = 0; y < 4; y++) 
     {
-        for (int k = 0; k < 4; k++)
+        for (int x = 0; x < 4; x++)
         {
-            if (MAP[j][k] == 0){ screen.sprite(n0, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 2){ screen.sprite(n2, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 4){screen.sprite(n4, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 8){screen.sprite(n8, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 16){screen.sprite(n16, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 32){screen.sprite(n32, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 64){screen.sprite(n64, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 128){screen.sprite(n128, Point(42 + k *SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 256){screen.sprite(n256, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 512){screen.sprite(n512, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 1024){screen.sprite(n1024, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 2048){screen.sprite(n2048, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));}
-            if (MAP[j][k] == 4096){screen.sprite(n4096, Point(42 + k * SQURE_SIZE, 2 + j * SQURE_SIZE));} 
+            if (MAP[y][x] == 0){ screen.sprite(n0, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 2){ screen.sprite(n2, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 4){screen.sprite(n4, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 8){screen.sprite(n8, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 16){screen.sprite(n16, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 32){screen.sprite(n32, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 64){screen.sprite(n64, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 128){screen.sprite(n128, Point(42 + x *SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 256){screen.sprite(n256, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 512){screen.sprite(n512, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 1024){screen.sprite(n1024, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 2048){screen.sprite(n2048, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));}
+            if (MAP[y][x] == 4096){screen.sprite(n4096, Point(42 + x * SQURE_SIZE, 2 + y * SQURE_SIZE));} 
         }
         
     }
-
+    
 }
 
     
@@ -85,4 +304,34 @@ void render(uint32_t time) {
 // amount if milliseconds elapsed since the start of your game
 //
 void update(uint32_t time) {
+    if (buttons.released & Button::DPAD_UP) 
+    {
+        pushZerosTop();
+        plusUP();
+        pushZerosTop();  
+    }
+    if (buttons.released & Button::DPAD_DOWN)
+    {
+        pushZerosDown();
+        plusDown();
+        pushZerosDown();
+    }
+    if (buttons.released & Button::DPAD_LEFT)
+    {
+        pushZerosLeft();
+        plusLeft();
+        pushZerosLeft();
+    }
+    if (buttons.released & Button::DPAD_RIGHT )
+    {
+        pushZeroRight();
+        plusRight();
+        pushZeroRight();
+    }
+    if  (Moved) 
+    {
+        Moved = false;
+        generateRandomNumber();
+
+    }
 }
