@@ -32,6 +32,7 @@ Rect n4096 = Rect(77,0,7,7);
 
 bool Moved = false;
  int SCORE = 0;
+ int MOVES = 0;
 
 ///////////////////////////////////////////////////////////////////////////
 void generateRandomNumber()
@@ -74,12 +75,11 @@ void generateRandomNumber()
     }       
 
 } 
-void score()
+void statistics()
 {
-
-    // /screen.alpha = 255;
   screen.pen = Pen(255, 255, 255);
   screen.text("Score: " + std::to_string(SCORE),  minimal_font, Point(255, 30));
+  screen.text("Moves: " + std::to_string(MOVES),  minimal_font, Point(255, 45));
 
 }   
 
@@ -294,7 +294,7 @@ void render(uint32_t time) {
     screen.rectangle(Rect(0, 0, 320, 240));
   
 
-    score();
+    statistics();
 
     for (int y = 0; y < 4; y++) 
     {
@@ -355,6 +355,7 @@ void update(uint32_t time) {
     }
     if  (Moved) 
     {
+        MOVES ++;
         Moved = false;
         generateRandomNumber();
 
