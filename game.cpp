@@ -1,8 +1,6 @@
 #include "game.hpp"
 #include "assets.hpp"
-#include <time.h>
-#include <iostream>
-#include <cstdlib>
+
 // #include "32blit.hpp"
 using namespace blit;
 
@@ -11,11 +9,11 @@ using namespace blit;
 #define SQURE_SIZE 58
 
 
-int MAP[4][4] = {
-    {4, 4, 16, 0,},
-	{2, 0, 0, 4},
-	{2, 0, 32, 0},
-	{0, 0, 128, 0},	
+int MAP[4][4] = {0
+    // {2, 2, 0, 4,},
+	// {0, 0, 2, 0},
+	// {0, 4, 0, 2},
+	// {4, 2, 0, 2},	
 };
 // numbers
 Rect n0 = Rect(84,0,7,7);
@@ -37,122 +35,215 @@ bool Moved = false;
 ///////////////////////////////////////////////////////////////////////////
 void generateRandomNumber()
 {
+    //1 - limit the loop
+    //2 - generate 2 and 4
+    //3 - 4 is rare
+    // int val = blit::random() % 2 == 0 ? 2 : 4;
+    int val;
     uint x,y;
-       do
+    for (int i = 0; i < 21; i++)
     {
-        x = rand() %4;
-        y = rand() %4;
-    } while (MAP[y][x] !=0);
-
-    MAP[y][x]=2;
-}
-// void score()
-// {
-//     int score;
-//     for ( int x = 0; x < 4; x++)
-//     {
-//         for (int y = 0; y < 4; y++)
-//         {
-//             score += MAP[y][x];
-//         }
+    x = blit::random() %4;
+    y = blit::random() %4;
+    if  (MAP[y][x] ==0) break;
+    } 
+    if  (MAP[y][x] !=0)
+    {
+        for (x = 0; x < 4; x++)
+        {
+            for (y = 0; y<4; y++)
+            {
+                if  (MAP[y][x] !=0) continue;
+                else  break;
+            }
+        }
         
-//     }
-// }
-
-
-
-void move(int x, int y, int X, int Y )
-{   
-    if (MAP[y][x] == 0 && MAP[y+Y][x+X] !=0)
-    {   
-        MAP[y][x] = MAP[y+Y][x+X];
-        MAP[y+Y][x+X] = 0;
-        Moved = true;
     }
-        
+
+    val = blit::random() %4;
+
+    if  (val < 4)
+    {
+        MAP[y][x]=2;
+    }
+    else 
+    {
+        MAP[y][x]=4;
+    }
+}    
+
+void swap( int *a, int *b )
+{
+   int tmp = *a;
+   *a = *b;
+   *b = tmp;;
+}
+
+void pushZerosEndRaw(int y, int direction){
+    int FirstNonZero;
+
+    if (direction == 1)
+    {
+        FirstNonZero = 0;
+
+        for (int x = 0; x < 4; x++)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                FirstNonZero ++;
+                Moved = true;
+            } 
+        }
+    }
+    else 
+    {
+        FirstNonZero = 3;
+
+        for (int x = 3; x >= 0; x--)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                FirstNonZero --;
+                Moved = true;
+            } 
+        }
+    }
+    
+    
+}
+void pushZerosColumn(int x, int direction)
+{
+    if (direction == 1)
+    {
+        int FirstNonZero = 0;
+
+        for (int y = 0; y < 4; y++)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                FirstNonZero ++;
+                Moved = true;
+            } 
+        }
+    }
+    else 
+    {
+         int FirstNonZero = 3;
+
+        for (int y = 3; y >= 0; y--)
+        {
+            if  (MAP[y][x] !=0)
+            {
+                swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                FirstNonZero --;
+                Moved = true;
+            } 
+        }
+
+    }
+}
+
+void pushZerosDown()
+{
+    for (int x = 0; x < 4; x++)
+    {
+        pushZerosColumn(x,0);
+    }
+}
+
+void pushZerosTop()
+{
+    for (int x = 0; x < 4; x++)
+    {
+        pushZerosColumn(x,1);
+    }
+}
+
+void pushZerosLeft()
+{
+    for (int y = 0; y < 4; y++)
+    {
+        pushZerosEndRaw(y,1);
+    }
+}
+
+void pushZeroRight()
+{
+    for ( int y = 0; y < 4; y++)
+    {
+        pushZerosEndRaw(y,0);
+    }
+}
+
+void plus(int x, int y, int X, int Y )
+{
     if (MAP[y][x] != 0 && MAP[y][x] == MAP[y+Y][x+X])
     {
         MAP[y][x] =  MAP[y][x] + MAP[y+Y][x+X];
-        MAP[y+Y][x+X] = 0;
-        Moved = true;
-    }
-    if (MAP[y][x] == MAP[y+Y][x+X] + MAP[y+Y+1][x+X] || MAP[y][x] == MAP[y+Y][x+X] + MAP[y+Y][x+X+1] )
-    {
-       MAP[y][x] = MAP[y][x];
-       MAP[y+Y][x+X] = MAP[y+Y][x+X] + MAP[y+Y+1][x+X];
-       MAP[y+Y+1][x+X] = MAP[y+Y+2][x+X];
-
-    }
-    
-}
-
-void moveUP()
-{
-    uint x,y;
-
-    for (int i = 0; i < 3; i++)
-    {
-        for ( x = 0; x < 4; x++)
-        {
-            for ( y = 0; y < 3; y++)
-            {
-                move(x, y, 0 , 1);
-            }
-        }
-    }
-}   
-
-void moveDown()
-{   
-    uint x,y;
-
-    for (int i = 0; i < 3; i++)
-    {
-        for ( x = 0; x < 4; x++)
-        {
-            for ( y = 3; y > 0; y--)
-            {
-                move(x, y, 0 , -1);
-            }
+        MAP[y+Y][x+X] = 0;   
         
-        }
-    }
-}
-
-void moveLeft() 
-{
-    uint x,y;
-
-    for (int i = 0; i < 3; i++)
-    {
-        for ( y = 0; y < 4; y++)
-        {
-            for ( x = 0; x < 3; x++)
-            {
-                move(x, y, 1 , 0);
-            }
-        }
     } 
 }
 
-void moveRight() 
+void plusUP()
 {
     uint x,y;
 
-    for (int i = 0; i < 3; i++)
+    for ( x = 0; x < 4; x++)
+    {
+        for ( y = 0; y < 3; y++)
+        {
+            plus(x, y, 0 , 1);
+        }
+    }
+    
+}   
+
+void plusDown()
+{
+    uint x,y;
+
+    for ( x = 0; x < 4; x++)
     {
         for ( y = 0; y < 4; y++)
         {
-            for ( x = 3; x > 0; x--)
-            {
-                move(x, y, -1 , 0);
-            }
+            plus(x, y, 0 , -1);
         }
     }
+    
+}
+void plusLeft()
+{
+    uint x,y;
+
+    for ( y = 0; y < 4; y++)
+        {
+            for ( x = 0; x < 3; x++)
+            {
+                plus(x, y, 1 , 0);
+            }
+        }
+} 
+
+void plusRight()
+{
+    uint x,y;
+
+    for ( y = 0; y < 4; y++)
+        {
+            for ( x = 3; x > 0; x--)
+            {
+                plus(x, y, -1 , 0);
+            }
+        }
 }
 
+
+
 void init() {
-    srand(time(0));
     set_screen_mode(ScreenMode::hires);
     screen.sprites = Surface::load(sheet);
     generateRandomNumber();
@@ -213,20 +304,27 @@ void render(uint32_t time) {
 void update(uint32_t time) {
     if (buttons.released & Button::DPAD_UP) 
     {
-        moveUP();
-        
+        pushZerosTop();
+        plusUP();
+        pushZerosTop();  
     }
     if (buttons.released & Button::DPAD_DOWN)
     {
-        moveDown();
+        pushZerosDown();
+        plusDown();
+        pushZerosDown();
     }
     if (buttons.released & Button::DPAD_LEFT)
     {
-        moveLeft();
+        pushZerosLeft();
+        plusLeft();
+        pushZerosLeft();
     }
     if (buttons.released & Button::DPAD_RIGHT )
     {
-        moveRight();
+        pushZeroRight();
+        plusRight();
+        pushZeroRight();
     }
     if  (Moved) 
     {
