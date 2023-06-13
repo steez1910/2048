@@ -9,12 +9,7 @@ using namespace blit;
 #define SQURE_SIZE 58
 
 
-int MAP[4][4] = {0
-    // {2, 2, 8, 16,},
-	// {16, 2, 4, 8},
-	// {2, 4, 8, 16},
-	// {16, 4, 4, 8},	
-};
+int MAP[4][4] = {0};
 // numbers
 Rect n0 = Rect(84,0,7,7);
 Rect n2 = Rect(0,0,7,7);
@@ -33,6 +28,7 @@ Rect n4096 = Rect(77,0,7,7);
 bool Moved = false;
  int SCORE = 0;
  int MOVES = 0;
+bool GAME_OVER = false;
 
 ///////////////////////////////////////////////////////////////////////////
 void generateRandomNumber()
@@ -75,6 +71,35 @@ void generateRandomNumber()
     }       
 
 } 
+
+bool canMove()
+{
+
+    bool canMove = false;
+
+    for (int y = 0; y < 4; y++){
+        for (int x = 0; x < 3; x++)
+        {
+            if (MAP[y][x] == MAP[y][x+1] || MAP[y][x] == 0 || MAP[y][x+1] == 0){
+                return true;
+            }
+        }
+    }
+    for (int y = 0; y < 3; y++){
+        for (int x = 0; x < 4; x++)
+        {
+            if (MAP[y][x] == MAP[y+1][x] || MAP[y][x] == 0 || MAP[y+1][x] == 0){
+                return true;
+            }
+        }
+    }
+    
+    
+
+    return canMove; 
+
+}
+
 void statistics()
 {
   screen.pen = Pen(255, 255, 255);
@@ -106,6 +131,7 @@ void pushZerosEndRaw(int y, int direction){
                     Moved = true;
                     swap(&MAP[y][x], &MAP[y][FirstNonZero]);
                 }
+
                 FirstNonZero ++; 
                 
             } 
@@ -292,7 +318,8 @@ void render(uint32_t time) {
     renderBackground();
     screen.pen = Pen(0, 0, 0);
     screen.rectangle(Rect(0, 0, 320, 240));
-  
+    
+    
 
     statistics();
 
@@ -316,7 +343,15 @@ void render(uint32_t time) {
         }
         
     }
-    
+    if(GAME_OVER){
+         
+        screen.pen = Pen(0, 0, 0);
+        screen.rectangle(Rect(0, 0, 320, 240));
+        screen.pen = Pen(255, 255, 255);
+        screen.text("Game Over", minimal_font, Point(132, 112));
+        
+
+    }
 }
 
     
@@ -360,4 +395,5 @@ void update(uint32_t time) {
         generateRandomNumber();
 
     }
+    GAME_OVER = ! canMove();
 }
