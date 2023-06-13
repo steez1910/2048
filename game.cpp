@@ -9,11 +9,11 @@ using namespace blit;
 #define SQURE_SIZE 58
 
 
-int MAP[4][4] = {
-    {2, 2, 8, 16,},
-	{16, 2, 4, 8},
-	{2, 4, 8, 16},
-	{16, 4, 4, 8},	
+int MAP[4][4] = {0
+    // {2, 2, 8, 16,},
+	// {16, 2, 4, 8},
+	// {2, 4, 8, 16},
+	// {16, 4, 4, 8},	
 };
 // numbers
 Rect n0 = Rect(84,0,7,7);
@@ -42,7 +42,7 @@ void generateRandomNumber()
     int val;
     uint x,y;
 
-    if  ((blit::random() % 4) < 4)
+    if  ((blit::random() % 10) < 9)
     {
         val=2;
     }
@@ -92,9 +92,13 @@ void pushZerosEndRaw(int y, int direction){
         {
             if  (MAP[y][x] !=0)
             {
-                swap(&MAP[y][x], &MAP[y][FirstNonZero]);
-                FirstNonZero ++;
-                Moved = true;
+                if  (x != FirstNonZero)
+                {
+                    Moved = true;
+                    swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                }
+                FirstNonZero ++; 
+                
             } 
         }
     }
@@ -106,14 +110,16 @@ void pushZerosEndRaw(int y, int direction){
         {
             if  (MAP[y][x] !=0)
             {
-                swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                if  (x != FirstNonZero)
+                {
+                    Moved = true;
+                    swap(&MAP[y][x], &MAP[y][FirstNonZero]);
+                }
                 FirstNonZero --;
-                Moved = true;
             } 
-        }
+                    
+        }  
     }
-    
-    
 }
 void pushZerosColumn(int x, int direction)
 {
@@ -121,13 +127,17 @@ void pushZerosColumn(int x, int direction)
     {
         int FirstNonZero = 0;
 
-        for (int y = 0; y < 4; y++)
+        for ( int y = 0; y < 4; y++)
         {
             if  (MAP[y][x] !=0)
             {
-                swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                if  (y != FirstNonZero)
+                {
+                    Moved = true;
+                    swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                }
+                
                 FirstNonZero ++;
-                Moved = true;
             } 
         }
     }
@@ -135,13 +145,16 @@ void pushZerosColumn(int x, int direction)
     {
          int FirstNonZero = 3;
 
-        for (int y = 3; y >= 0; y--)
+        for ( int y = 3; y >= 0; y--)
         {
             if  (MAP[y][x] !=0)
             {
-                swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                if  (y != FirstNonZero)
+                {
+                    Moved = true;
+                    swap(&MAP[y][x], &MAP[FirstNonZero][x]);
+                }            
                 FirstNonZero --;
-                Moved = true;
             } 
         }
 
@@ -185,8 +198,8 @@ void plus(int x, int y, int X, int Y )
     if (MAP[y][x] != 0 && MAP[y][x] == MAP[y+Y][x+X])
     {
         MAP[y][x] =  MAP[y][x] + MAP[y+Y][x+X];
-        MAP[y+Y][x+X] = 0;   
-        
+        MAP[y+Y][x+X] = 0; 
+        Moved = true;    
     } 
 }
 
@@ -249,7 +262,7 @@ void init() {
     set_screen_mode(ScreenMode::hires);
     screen.sprites = Surface::load(sheet);
     generateRandomNumber();
-    //generateRandomNumber();
+    generateRandomNumber();
 }
 
 void renderBackground(){
@@ -304,6 +317,7 @@ void render(uint32_t time) {
 // amount if milliseconds elapsed since the start of your game
 //
 void update(uint32_t time) {
+    Moved = false;
     if (buttons.released & Button::DPAD_UP) 
     {
         pushZerosTop();
