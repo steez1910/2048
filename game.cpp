@@ -9,11 +9,11 @@ using namespace blit;
 #define SQURE_SIZE 58
 
 
-int MAP[4][4] = {0
-    // {2, 2, 0, 4,},
-	// {0, 0, 2, 0},
-	// {0, 4, 0, 2},
-	// {4, 2, 0, 2},	
+int MAP[4][4] = {
+    {2, 2, 8, 16,},
+	{16, 2, 4, 8},
+	{2, 4, 8, 16},
+	{16, 4, 4, 8},	
 };
 // numbers
 Rect n0 = Rect(84,0,7,7);
@@ -41,35 +41,37 @@ void generateRandomNumber()
     // int val = blit::random() % 2 == 0 ? 2 : 4;
     int val;
     uint x,y;
-    for (int i = 0; i < 21; i++)
-    {
-    x = blit::random() %4;
-    y = blit::random() %4;
-    if  (MAP[y][x] ==0) break;
-    } 
-    if  (MAP[y][x] !=0)
-    {
-        for (x = 0; x < 4; x++)
-        {
-            for (y = 0; y<4; y++)
-            {
-                if  (MAP[y][x] !=0) continue;
-                else  break;
-            }
-        }
-        
-    }
 
-    val = blit::random() %4;
-
-    if  (val < 4)
+    if  ((blit::random() % 4) < 4)
     {
-        MAP[y][x]=2;
+        val=2;
     }
     else 
     {
-        MAP[y][x]=4;
+        val=4;
     }
+
+    for (int i = 0; i < 21; i++)
+    {
+        x = blit::random() % 4;
+        y = blit::random() % 4;
+        if  (MAP[y][x] == 0) {
+                MAP[y][x] = val;
+                return;
+        }
+    }
+
+    for (x = 0; x < 4; x++)
+    {
+        for (y = 0; y < 4; y++)
+        {
+            if  (MAP[y][x] == 0) {
+                MAP[y][x] = val;
+                return;
+            }
+        }
+    }       
+
 }    
 
 void swap( int *a, int *b )
@@ -247,7 +249,7 @@ void init() {
     set_screen_mode(ScreenMode::hires);
     screen.sprites = Surface::load(sheet);
     generateRandomNumber();
-    generateRandomNumber();
+    //generateRandomNumber();
 }
 
 void renderBackground(){
